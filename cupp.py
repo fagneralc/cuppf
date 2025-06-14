@@ -41,6 +41,7 @@ import urllib.error
 import urllib.parse
 import urllib.request
 import time
+import re
 
 __author__ = "Mebus"
 __license__ = "GPL"
@@ -111,7 +112,9 @@ def concats(seq, start, stop):
 def komb(seq, start, special=""):
     for mystr in seq:
         for mystr1 in start:
-            yield mystr + special + mystr1
+            if len(mystr+mystr1)>4:
+                yield mystr + special + mystr1
+            else:continue
 
 
 # print list to file counting words
@@ -374,6 +377,54 @@ def interactive():
 
     generate_wordlist_from_profile(profile)  # generate the wordlist
 
+def got_birthdays_keys(birthdate:str) -> list:
+    return [birthdate[-2:], birthdate[-3:], birthdate[-4:], birthdate[1:2], birthdate[3:4], birthdate[:2], birthdate[2:4]]
+
+def generate_birthdays_combinations(bds:list) -> list:
+    bdss = []
+    for bds1 in bds:
+        bdss.append(bds1)
+        for bds2 in bds:
+            if bds.index(bds1) != bds.index(bds2):
+                bdss.append(bds1 + bds2)
+                for bds3 in bds:
+                    if (
+                        bds.index(bds1) != bds.index(bds2)
+                        and bds.index(bds2) != bds.index(bds3)
+                        and bds.index(bds1) != bds.index(bds3)
+                    ):
+                        bdss.append(bds1 + bds2 + bds3)
+    return bdss
+
+def generate_combinations(kombina):
+    kombinaa = []
+    for kombina1 in kombina:
+        kombinaa.append(kombina1)
+        for kombina2 in kombina:
+            if kombina.index(kombina1) != kombina.index(kombina2) and kombina.index(kombina1.title()) != kombina.index(kombina2.title()):
+                kombinaa.append(kombina1 + kombina2)
+    return kombinaa
+
+def make_profile(*args):
+    result = []
+    for i, valor in enumerate(args, 1):
+        result.append(valor)
+        if isinstance(valor, str):
+            valor = re.split(r'[^a-zA-Z0-9]+', valor)
+            if len(valor) > 1:
+                for x in valor:
+                    if len(x) > 2:
+                        result.append(x)
+                        result.append(x[0:2].title())
+            else:
+                result.append(valor[0][0:2].title())
+            """Cool but can overload the list, so we will not use it"""
+            #for couple in range(0,len(valor),2):
+            #    if couple + 1 < len(valor):
+            #        result.append(valor[couple] + valor[couple + 1])
+            #        result.append(valor[couple].capitalize() + valor[couple + 1])
+    result = list(dict.fromkeys(result).keys())
+    return result
 
 def generate_wordlist_from_profile(profile, compact=False):
     """ Generates a wordlist from a given profile """
@@ -396,32 +447,6 @@ def generate_wordlist_from_profile(profile, compact=False):
     print("\r\n[+] Now making a dictionary...")
 
     # Now me must do some string modifications...
-
-    # Birthdays first
-
-    birthdate_yy = profile["birthdate"][-2:]
-    birthdate_yyy = profile["birthdate"][-3:]
-    birthdate_yyyy = profile["birthdate"][-4:]
-    birthdate_xd = profile["birthdate"][1:2]
-    birthdate_xm = profile["birthdate"][3:4]
-    birthdate_dd = profile["birthdate"][:2]
-    birthdate_mm = profile["birthdate"][2:4]
-
-    wifeb_yy = profile["wifeb"][-2:]
-    wifeb_yyy = profile["wifeb"][-3:]
-    wifeb_yyyy = profile["wifeb"][-4:]
-    wifeb_xd = profile["wifeb"][1:2]
-    wifeb_xm = profile["wifeb"][3:4]
-    wifeb_dd = profile["wifeb"][:2]
-    wifeb_mm = profile["wifeb"][2:4]
-
-    kidb_yy = profile["kidb"][-2:]
-    kidb_yyy = profile["kidb"][-3:]
-    kidb_yyyy = profile["kidb"][-4:]
-    kidb_xd = profile["kidb"][1:2]
-    kidb_xm = profile["kidb"][3:4]
-    kidb_dd = profile["kidb"][:2]
-    kidb_mm = profile["kidb"][2:4]
 
     # Convert first letters to uppercase...
 
@@ -464,73 +489,21 @@ def generate_wordlist_from_profile(profile, compact=False):
     rev_n = [rev_name, rev_nameup, rev_nick, rev_nickup]
     rev_w = [rev_wife, rev_wifeup]
     rev_k = [rev_kid, rev_kidup]
-    # Let's do some serious work! This will be a mess of code, but... who cares? :)
+    # Let's do some serious work! This will be a mess of code, but... who cares? :) I Care kkkk XD
 
     # Birthdays combinations
+    bds = got_birthdays_keys(profile["birthdate"])
+    bdss = generate_birthdays_combinations(bds)
 
-    bds = [
-        birthdate_yy,
-        birthdate_yyy,
-        birthdate_yyyy,
-        birthdate_xd,
-        birthdate_xm,
-        birthdate_dd,
-        birthdate_mm,
-    ]
-
-    bdss = []
-
-    for bds1 in bds:
-        bdss.append(bds1)
-        for bds2 in bds:
-            if bds.index(bds1) != bds.index(bds2):
-                bdss.append(bds1 + bds2)
-                for bds3 in bds:
-                    if (
-                        bds.index(bds1) != bds.index(bds2)
-                        and bds.index(bds2) != bds.index(bds3)
-                        and bds.index(bds1) != bds.index(bds3)
-                    ):
-                        bdss.append(bds1 + bds2 + bds3)
-
-                # For a woman...
-    wbds = [wifeb_yy, wifeb_yyy, wifeb_yyyy, wifeb_xd, wifeb_xm, wifeb_dd, wifeb_mm]
-
-    wbdss = []
-
-    for wbds1 in wbds:
-        wbdss.append(wbds1)
-        for wbds2 in wbds:
-            if wbds.index(wbds1) != wbds.index(wbds2):
-                wbdss.append(wbds1 + wbds2)
-                for wbds3 in wbds:
-                    if (
-                        wbds.index(wbds1) != wbds.index(wbds2)
-                        and wbds.index(wbds2) != wbds.index(wbds3)
-                        and wbds.index(wbds1) != wbds.index(wbds3)
-                    ):
-                        wbdss.append(wbds1 + wbds2 + wbds3)
-
-                # and a child...
-    kbds = [kidb_yy, kidb_yyy, kidb_yyyy, kidb_xd, kidb_xm, kidb_dd, kidb_mm]
-
-    kbdss = []
-
-    for kbds1 in kbds:
-        kbdss.append(kbds1)
-        for kbds2 in kbds:
-            if kbds.index(kbds1) != kbds.index(kbds2):
-                kbdss.append(kbds1 + kbds2)
-                for kbds3 in kbds:
-                    if (
-                        kbds.index(kbds1) != kbds.index(kbds2)
-                        and kbds.index(kbds2) != kbds.index(kbds3)
-                        and kbds.index(kbds1) != kbds.index(kbds3)
-                    ):
-                        kbdss.append(kbds1 + kbds2 + kbds3)
-
-                # string combinations....
-
+    # For a woman...
+    wbds = got_birthdays_keys(profile["wifeb"])
+    wbdss = generate_birthdays_combinations(wbds)
+    
+    # and a child...
+    kbds = got_birthdays_keys(profile["kidb"])
+    kbdss = generate_birthdays_combinations(kbds)
+    
+    # string combinations....
     kombinaac = [profile["pet"], petup, profile["company"], companyup]
 
     kombina = [
@@ -541,6 +514,13 @@ def generate_wordlist_from_profile(profile, compact=False):
         surnameup,
         nickup,
     ]
+
+    kombina = make_profile(profile["name"],
+        profile["surname"],
+        profile["nick"],
+        nameup,
+        surnameup,
+        nickup)
 
     kombinaw = [
         profile["wife"],
@@ -560,32 +540,9 @@ def generate_wordlist_from_profile(profile, compact=False):
         surnameup,
     ]
 
-    kombinaa = []
-    for kombina1 in kombina:
-        kombinaa.append(kombina1)
-        for kombina2 in kombina:
-            if kombina.index(kombina1) != kombina.index(kombina2) and kombina.index(
-                kombina1.title()
-            ) != kombina.index(kombina2.title()):
-                kombinaa.append(kombina1 + kombina2)
-
-    kombinaaw = []
-    for kombina1 in kombinaw:
-        kombinaaw.append(kombina1)
-        for kombina2 in kombinaw:
-            if kombinaw.index(kombina1) != kombinaw.index(kombina2) and kombinaw.index(
-                kombina1.title()
-            ) != kombinaw.index(kombina2.title()):
-                kombinaaw.append(kombina1 + kombina2)
-
-    kombinaak = []
-    for kombina1 in kombinak:
-        kombinaak.append(kombina1)
-        for kombina2 in kombinak:
-            if kombinak.index(kombina1) != kombinak.index(kombina2) and kombinak.index(
-                kombina1.title()
-            ) != kombinak.index(kombina2.title()):
-                kombinaak.append(kombina1 + kombina2)
+    kombinaa = generate_combinations(kombina)
+    kombinaaw = generate_combinations(kombinaw)
+    kombinaak = generate_combinations(kombinak)
 
     kombi = {}
     kombi[1] = list(komb(kombinaa, bdss))
