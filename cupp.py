@@ -117,7 +117,7 @@ def komb(seq, start, special=""):
 # print list to file counting words
 
 
-def print_to_file(filename, unique_list_finished):
+def print_to_file(filename, unique_list_finished, compact=False):
     f = open(filename, "w")
     unique_list_finished.sort()
     f.write(os.linesep.join(unique_list_finished))
@@ -134,7 +134,9 @@ def print_to_file(filename, unique_list_finished):
         + str(lines)
         + " words.\033[1;m"
     )
-    inspect = input("> Hyperspeed Print? (Y/n) : ").lower()
+    inspect = ""
+    if not compact:
+        inspect = input("> Hyperspeed Print? (Y/n) : ").lower()
     if inspect == "y":
         try:
             with open(filename, "r+") as wlist:
@@ -373,7 +375,7 @@ def interactive():
     generate_wordlist_from_profile(profile)  # generate the wordlist
 
 
-def generate_wordlist_from_profile(profile):
+def generate_wordlist_from_profile(profile, compact=False):
     """ Generates a wordlist from a given profile """
 
     chars = CONFIG["global"]["chars"]
@@ -705,7 +707,7 @@ def generate_wordlist_from_profile(profile):
         if len(x) < CONFIG["global"]["wcto"] and len(x) > CONFIG["global"]["wcfrom"]
     ]
 
-    print_to_file(profile["name"] + ".txt", unique_list_finished)
+    print_to_file(profile["name"] + ".txt", unique_list_finished, compact=compact)
 
 
 def download_http(url, targetfile):
@@ -1037,6 +1039,31 @@ def main():
         version()
     elif args.interactive:
         interactive()
+    elif args.compact:
+        details = args.compact.split(";")
+        if len(details) < 13:
+            missing = 13 - len(details)
+            for _ in range(missing):
+                details.append("")
+        profile = {
+            'name': details[0],
+            'surname': details[1],
+            'nick': details[2],
+            'birthdate': details[3],
+            'wife': details[4],
+            'wifen': details[5],
+            'wifeb': details[6],
+            'kid': details[7],
+            'kidn': details[8], 
+            'kidb': details[9], 
+            'pet': details[10],
+            'company': details[11],
+            'words': details[12].split(",") if details[12] else [],
+            'spechars1': 'y', 
+            'randnum': 'y', 
+            'leetmode': 'y'
+        }
+        generate_wordlist_from_profile(profile, compact=True)
     elif args.download_wordlist:
         download_wordlist()
     elif args.alecto:
@@ -1058,6 +1085,13 @@ def get_parser():
         "--interactive",
         action="store_true",
         help="Interactive questions for user password profiling",
+    )
+    group.add_argument(
+        "-c",
+        "--compact",
+        type=str,
+        metavar="Profile",
+        help="Compact version of -i, use a profile, separated by ; to generate a wordlist\n EX: name;surname;nick;birthdate;wife;wifebirthdate;kid;kidbirthdate;pet;company;words",
     )
     group.add_argument(
         "-w",
