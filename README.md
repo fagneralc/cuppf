@@ -113,5 +113,8 @@ to encourage further development of the tool.
 
   * quantumcore  
     https://github.com/quantumcore
+
+  * SoenSh  
+    https://github.com/fagneralc
     
 
